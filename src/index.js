@@ -50,10 +50,10 @@ function isAllTrue(array, fn) {
  */
 
 function isSomeTrue(array, fn) {
-    if (typeof fn !== 'function') {
-        throw new Error('fn is not a function');
-    } else if (array.length < 1 || array.constructor.name !== 'Array') {
+    if (array.constructor.name !== 'Array' || array.length < 1) {
         throw new Error('empty array');
+    } else if (typeof fn !== 'function') {
+        throw new Error('fn is not a function');
     }
     for (let i = 0; i < array.length; i++) {   
         if (fn(array[i]) === true) {
