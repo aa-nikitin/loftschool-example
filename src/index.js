@@ -124,14 +124,17 @@ function deleteTextNodes(where) {
 
 function deleteTextNodesRecursive(where) {    
   let items = [...where.childNodes];
-  
-  for (let i of items) {   
-     if (i.nodeType === Node.TEXT_NODE) {
-         i.remove();    
-     } else if (i.nodeType === Node.ELEMENT_NODE) {
+
+  for (let i of items) { 
+    switch (i.nodeType) {
+      case Node.TEXT_NODE:
+        i.remove(); 
+        break;
+      case Node.ELEMENT_NODE:
         deleteTextNodesRecursive(i); 
-     }
-  }     
+        break;
+    }
+  }    
 }
 
 /*
@@ -156,40 +159,27 @@ function deleteTextNodesRecursive(where) {
  */
 
 function collectDOMStat(root) {
-  let rObj, 
-      obj = { tags: {}, classes: {}, texts: 0 };
-      
-  for (let i of root.childNodes) { 
-      
-     rObj = collectDOMStat(i); 
-     
-     if (i.tagName) { 
-        rObj.tags[i.tagName] = ~~rObj.tags[i.tagName] + 1;
-     } 
-     if (i.classList) { 
-          for (let cl of i.classList) {             
-            rObj.classes[cl] = ~~rObj.classes[cl] + 1;
-          } 
-     }      
-     if (i.nodeType === Node.TEXT_NODE) {    
-         obj.texts++;  
-     } 
-     if (i.nodeType === Node.ELEMENT_NODE) { 
-          
-        obj.texts += rObj.texts;
-        for (let j in rObj.classes) {
-          obj.classes[j] = ~~obj.classes[j] + rObj.classes[j]; 
-        }
-        for (let j in rObj.tags) {
-          obj.tags[j] = ~~obj.tags[j] + rObj.tags[j]; 
-        }         
-     } 
-       
-  }  
-  
-  return obj;
 
-}
+  let fn = (node, obj) => {
+      obj = obj || {tags: {}, classes: {}, texts: 0};
+      for (let i of node.childNodes) {
+          if (i.nodeType === Node.TEXT_NODE) {
+              obj.texts++;
+          }
+          if (i.childNodes.length) {
+              obj.tags[i.tagName] = ~~obj.tags[i.tagName] + 1;
+              for (let cl of i.classList) {             
+                  obj.classes[cl] = ~~obj.classes[cl] + 1;
+              }  
+              obj = fn(i, obj); 
+          }         
+      }   
+      return obj;
+  }
+  
+  return fn(root); 
+
+} 
 
 /*
  Задание 8 *:
@@ -224,6 +214,20 @@ function collectDOMStat(root) {
    }
  */
 function observeChildNodes(where, fn) {
+  let observer = new MutationObserver(function(mutations) {
+    console.log(Array);
+      mutations.forEach(function(m) {
+        if (m.addedNodes.length) {
+          fn({ 'type': 'insert', 'nodes': Array.from(m.addedNodes) });
+        } else if (m.removedNodes.length) {
+          fn({ 'type': 'remove', 'nodes': Array.from(m.removedNodes) });
+        }
+      });    
+  });
+
+  var config = { childList: true };
+  
+  observer.observe(where, config);
 }
 
 export {
