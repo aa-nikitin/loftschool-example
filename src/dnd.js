@@ -15,6 +15,7 @@
    const newDiv = document.createElement('div');
    homeworkContainer.appendChild(newDiv);
  */
+
 const homeworkContainer = document.querySelector('#homework-container');
 
 /*
@@ -27,6 +28,24 @@ const homeworkContainer = document.querySelector('#homework-container');
    homeworkContainer.appendChild(newDiv);
  */
 function createDiv() {
+  const div = document.createElement('div');
+  let Rnd = fn => Math.random() * fn(),
+  w =  window.innerWidth,
+  h =  window.innerHeight,
+  color = '#';
+
+  for (let i = 0; i < 3; i++) { 
+      let j = (~~Rnd(() => 255)).toString(16);
+      color += j < 16 ? '0' + j : j;
+  }
+  div.style.top = `${Rnd(() => h - (w / 10))}px`;
+  div.style.left = `${Rnd(() => w - (h / 10))}px`;
+  div.style.height = `${Rnd(() => w / 10)}px`;
+  div.style.width = `${Rnd(() => w / 10)}px`;
+  div.style.backgroundColor = `${color}`;
+  div.classList.add('draggable-div');
+ 
+  return div;  
 }
 
 /*
@@ -38,14 +57,26 @@ function createDiv() {
    addListeners(newDiv);
  */
 function addListeners(target) {
+
+    target.addEventListener('drag', e => {
+        target.style.left = `${e.clientX}px`;
+        target.style.top = `${e.clientY}px`;
+    });
+
+    target.addEventListener('dragend', e => {
+        target.style.left = `${e.clientX}px`;
+        target.style.top = `${e.clientY}px`;    
+    });
+
 }
 
 let addDivButton = homeworkContainer.querySelector('#addDiv');
 
 addDivButton.addEventListener('click', function() {
     // создать новый div
+    
     const div = createDiv();
-
+    
     // добавить на страницу
     homeworkContainer.appendChild(div);
     // назначить обработчики событий мыши для реализации D&D
