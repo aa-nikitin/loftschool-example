@@ -37,6 +37,22 @@ const homeworkContainer = document.querySelector('#homework-container');
  https://raw.githubusercontent.com/smelukov/citiesTest/master/cities.json
  */
 function loadTowns() {
+  return new Promise((resolve, reject) => {
+      const xhr = new XMLHttpRequest();
+
+      xhr.open('GET', 'https://raw.githubusercontent.com/smelukov/citiesTest/master/cities.json');
+      xhr.responseType = 'json';
+      xhr.send();
+      xhr.onload = () => {
+          if (xhr.status >= 400) {
+              reject('Что то пошло не так');
+          } else {
+              const city = xhr.response;
+              city.sort((a, b) => a.name > b.name ? 1 : -1 );
+              resolve(city);
+          }
+      };  
+  }); 
 }
 
 /*
@@ -51,6 +67,10 @@ function loadTowns() {
    isMatching('Moscow', 'Moscov') // false
  */
 function isMatching(full, chunk) {
+  full = full.toLowerCase();
+  chunk = chunk.toLowerCase();
+  
+  return full.indexOf(chunk) >=0 ? true : false;
 }
 
 /* Блок с надписью "Загрузка" */
@@ -61,9 +81,46 @@ const filterBlock = homeworkContainer.querySelector('#filter-block');
 const filterInput = homeworkContainer.querySelector('#filter-input');
 /* Блок с результатами поиска */
 const filterResult = homeworkContainer.querySelector('#filter-result');
+/* Кнопка с перезагрузкой */
+const repeatButton = homeworkContainer.querySelector('#button-repeat');
+
+let towns = [];
+
+function reload() {
+    loadTowns()
+        .then(city => {
+            towns = city;
+            filterBlock.style.display = 'block';
+            loadingBlock.style.display = 'none';
+            repeatButton.style.display = 'none';
+        },
+        error => {
+            loadingBlock.textContent = `${error}`;
+            repeatButton.style.display = 'block';
+            repeatButton.onclick = () => reload();
+            loadingBlock.parentElement.appendChild(repeatButton);
+        });
+}
+
+reload();
+
+
 
 filterInput.addEventListener('keyup', function() {
     // это обработчик нажатия кливиш в текстовом поле
+    filterResult.innerHTML = '';
+    let field = filterInput.value;
+
+    for (let town of towns) {
+      if (isMatching(town.name, field)){
+        const div = document.createElement('div');
+
+        div.innerHTML = town.name;
+        if (field) {
+          filterResult.appendChild(div);
+        }
+      }   
+    }
 });
 
 export {
