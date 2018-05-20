@@ -44,9 +44,97 @@ const addButton = homeworkContainer.querySelector('#add-button');
 const listTable = homeworkContainer.querySelector('#list-table tbody');
 
 filterNameInput.addEventListener('keyup', function() {
+    allCockie(arrCoockie);
     // здесь можно обработать нажатия на клавиши внутри текстового поля для фильтрации cookie
 });
 
+// формируем объект cookie
+let arrCoockie = document.cookie.split('; ').reduce((prev, current) => {
+  let [name, value] = current.split('=');
+  if (name || value) {
+    prev[name] = value;
+  }
+  return prev;
+}, {});
+
 addButton.addEventListener('click', () => {
     // здесь можно обработать нажатие на кнопку "добавить cookie"
+    document.cookie = `${addNameInput.value}=${addValueInput.value}`;
+    watchRow(addNameInput.value, addValueInput.value);
+    
 });
+
+// Добавляем строку в таблицу
+function addRow(key, val) {
+  let row = document.createElement('tr');
+  let name = document.createElement('td');
+  let value = document.createElement('td');
+  let del = document.createElement('td');
+  let button = document.createElement('button');
+
+  value.id = `id-${key}`;
+  name.textContent = key;
+  value.textContent = val;
+  button.textContent = 'Удалить';
+  del.appendChild(button);
+
+  button.onclick = () => {
+      document.cookie = name.textContent + `=;expires=${new Date().toUTCString()};`
+      row.remove();
+      delete arrCoockie[key];
+  };
+
+  row.appendChild(name);
+  row.appendChild(value);
+  row.appendChild(del);
+
+  listTable.appendChild(row);
+}
+
+// Изменяем строку в таблице
+function modifyRow(key, val) {
+  let value = listTable.querySelector(`#id-${key}`);
+
+  value.textContent = val;
+}
+
+// Добавляем строку в таблицу и coockie в объект
+function watchRow(key, val) {
+  
+  if (val === undefined) {
+    val = arrCoockie[key];
+    addRow(key, val); 
+  }
+
+  if (arrCoockie[key] === undefined) {
+    addRow(key, val);    
+  } else {
+    modifyRow(key, val); 
+  }
+
+  arrCoockie[addNameInput.value] = addValueInput.value; 
+}
+
+function allCockie(array) {
+  let field = filterNameInput.value;
+  listTable.textContent = '';  
+  for (let i in array) {
+      if (isMatching(i, field) && i){
+        watchRow(i);
+      } 
+  }
+}
+
+function isMatching(full, chunk) {
+  full = full.toLowerCase();
+  chunk = chunk.toLowerCase();
+  
+  return full.indexOf(chunk) >=0 ? true : false;
+}
+
+
+allCockie(arrCoockie);
+
+
+
+
