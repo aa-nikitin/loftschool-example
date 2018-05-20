@@ -119,17 +119,19 @@ function allCockie(array) {
   let field = filterNameInput.value;
   listTable.textContent = '';  
   for (let i in array) {
-      if (isMatching(i, field) && i){
+      if (isMatching(i, array[i], field) && i){
         watchRow(i);
       } 
   }
 }
 
-function isMatching(full, chunk) {
-  full = full.toLowerCase();
+function isMatching(key, name, chunk) {
+  key = key.toLowerCase();
+  name =name.toLowerCase();
   chunk = chunk.toLowerCase();
-  
-  return full.indexOf(chunk) >=0 ? true : false;
+  let keyVal = key.indexOf(chunk) >=0 ? true : false;
+  let nameVal = name.indexOf(chunk) >=0 ? true : false;
+  return  (keyVal || nameVal) ? true : false;
 }
 
 
