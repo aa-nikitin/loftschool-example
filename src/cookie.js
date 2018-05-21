@@ -66,14 +66,21 @@ addButton.addEventListener('click', () => {
 
 // Добавляем строку в таблицу
 function addRow(key, val) {
+  let value = listTable.querySelector(`#id-${key}`);
+  console.log(value);
+  if (arrCoockie[key] === undefined) {
+    return key;
+  }
+
   let row = document.createElement('tr');
   let name = document.createElement('td');
-  let value = document.createElement('td');
+  value = document.createElement('td');
   let del = document.createElement('td');
   let button = document.createElement('button');
 
   value.id = `id-${key}`;
-  name.textContent = key;
+  name.textContent = key; 
+  val = !val ? arrCoockie[key] : val;
   value.textContent = val;
   button.textContent = 'Удалить';
   del.appendChild(button);
@@ -101,18 +108,19 @@ function modifyRow(key, val) {
 // Добавляем строку в таблицу и coockie в объект
 function watchRow(key, val) {
   
-  if (val === undefined) {
+  /*if (val === undefined) {
     val = arrCoockie[key];
     addRow(key, val); 
-  }
+  }*/
 
-  if (arrCoockie[key] === undefined) {
+  /*if (arrCoockie[key] === undefined) {
     addRow(key, val);    
   } else {
     modifyRow(key, val); 
-  }
-
-  arrCoockie[addNameInput.value] = addValueInput.value; 
+  }*/
+  addRow(key, val);
+  arrCoockie[addNameInput.value] = addValueInput.value;
+  
 }
 
 function allCockie(array) {
