@@ -43,13 +43,8 @@ const addButton = homeworkContainer.querySelector('#add-button');
 // таблица со списком cookie
 const listTable = homeworkContainer.querySelector('#list-table tbody');
 
-filterNameInput.addEventListener('keyup', function() {
-    allCockie(arrCoockie);
-    // здесь можно обработать нажатия на клавиши внутри текстового поля для фильтрации cookie
-});
-
 // формируем объект cookie
-let arrCoockie = document.cookie.split('; ').reduce((prev, current) => {
+let objCoockie = document.cookie.split('; ').reduce((prev, current) => {
   let [name, value] = current.split('=');
   if (name || value) {
     prev[name] = value;
@@ -57,39 +52,27 @@ let arrCoockie = document.cookie.split('; ').reduce((prev, current) => {
   return prev;
 }, {});
 
-addButton.addEventListener('click', () => {
-    // здесь можно обработать нажатие на кнопку "добавить cookie"
-    document.cookie = `${addNameInput.value}=${addValueInput.value}`;
-    watchRow(addNameInput.value, addValueInput.value);
-    
-});
+console.log(objCoockie);
 
-// Добавляем строку в таблицу
 function addRow(key, val) {
-  let value = listTable.querySelector(`#id-${key}`);
-  console.log(value);
-  if (arrCoockie[key] === undefined) {
-    return key;
-  }
-
   let row = document.createElement('tr');
   let name = document.createElement('td');
-  value = document.createElement('td');
+  let value = document.createElement('td');
   let del = document.createElement('td');
   let button = document.createElement('button');
 
   value.id = `id-${key}`;
-  name.textContent = key; 
-  val = !val ? arrCoockie[key] : val;
+  name.textContent = key;
   value.textContent = val;
   button.textContent = 'Удалить';
   del.appendChild(button);
 
-  button.onclick = () => {
-      document.cookie = name.textContent + `=;expires=${new Date().toUTCString()};`
-      row.remove();
-      delete arrCoockie[key];
-  };
+  button.addEventListener('click', () => {
+    document.cookie = name.textContent + `=;expires=${new Date().toUTCString()};`
+    row.remove();
+    delete objCoockie[key];
+    
+  });
 
   row.appendChild(name);
   row.appendChild(value);
@@ -98,53 +81,62 @@ function addRow(key, val) {
   listTable.appendChild(row);
 }
 
-// Изменяем строку в таблице
-function modifyRow(key, val) {
+function changeRow(key, val) {
   let value = listTable.querySelector(`#id-${key}`);
 
   value.textContent = val;
 }
 
-// Добавляем строку в таблицу и coockie в объект
-function watchRow(key, val) {
-  
-  /*if (val === undefined) {
-    val = arrCoockie[key];
-    addRow(key, val); 
-  }*/
+filterNameInput.addEventListener('keyup', function() {
+    // здесь можно обработать нажатия на клавиши внутри текстового поля для фильтрации cookie
+    /*if (isMatching(i, array[i], field) && i){
+      watchRow(i);
+    }*/
+    let field = filterNameInput.value;
+    listTable.textContent = '';
+    for (let i in objCoockie) {
+        if (isMatching(i, field) || isMatching(objCoockie[i], field)){
+          addRow(i, objCoockie[i]);
+        } 
+    }
+    console.log(listTable.children.length);
+});
 
-  /*if (arrCoockie[key] === undefined) {
-    addRow(key, val);    
-  } else {
-    modifyRow(key, val); 
-  }*/
-  addRow(key, val);
-  arrCoockie[addNameInput.value] = addValueInput.value;
-  
-}
-
-function allCockie(array) {
-  let field = filterNameInput.value;
-  listTable.textContent = '';  
-  for (let i in array) {
-      if (isMatching(i, array[i], field) && i){
-        watchRow(i);
+addButton.addEventListener('click', () => {
+    let value = listTable.querySelector(`#id-${addNameInput.value}`);
+    let field = filterNameInput.value;
+    // здесь можно обработать нажатие на кнопку "добавить cookie"
+    if (!value) {
+      //addRow(addNameInput.value, addValueInput.value);
+      if (isMatching(addNameInput.value, field) || isMatching(addValueInput.value, field)){
+        addRow(addNameInput.value, addValueInput.value);
       } 
-  }
-}
+    } else {
+      changeRow(addNameInput.value, addValueInput.value);  
+    }
 
-function isMatching(key, name, chunk) {
-  key = key.toLowerCase();
-  name =name.toLowerCase();
+    document.cookie = `${addNameInput.value}=${addValueInput.value}`;
+    objCoockie[addNameInput.value] = addValueInput.value;  
+
+    
+    
+    console.log(listTable.children.length);
+});
+
+function isMatching(full, chunk) {
+  full = full.toLowerCase();
   chunk = chunk.toLowerCase();
-  let keyVal = key.indexOf(chunk) >=0 ? true : false;
-  let nameVal = name.indexOf(chunk) >=0 ? true : false;
-  return  (keyVal || nameVal) ? true : false;
+  
+  return full.indexOf(chunk) >=0 ? true : false;
 }
+let field = filterNameInput.value;
+for (let i in objCoockie) {
+  if (isMatching(i, field) || isMatching(objCoockie[i], field)){
+    addRow(i, objCoockie[i]);
+  } 
+}
+console.log(listTable.children.length);
 
-
-allCockie(arrCoockie);
-
-
-
-
+/*function delRow() {
+  console.log('asd');
+}*/
