@@ -43,10 +43,100 @@ const addButton = homeworkContainer.querySelector('#add-button');
 // таблица со списком cookie
 const listTable = homeworkContainer.querySelector('#list-table tbody');
 
+// формируем объект cookie
+let objCoockie = document.cookie.split('; ').reduce((prev, current) => {
+  let [name, value] = current.split('=');
+  if (name || value) {
+    prev[name] = value;
+  }
+  return prev;
+}, {});
+
+console.log(objCoockie);
+
+function addRow(key, val) {
+  let row = document.createElement('tr');
+  let name = document.createElement('td');
+  let value = document.createElement('td');
+  let del = document.createElement('td');
+  let button = document.createElement('button');
+
+  value.id = `id-${key}`;
+  name.textContent = key;
+  value.textContent = val;
+  button.textContent = 'Удалить';
+  del.appendChild(button);
+
+  button.addEventListener('click', () => {
+    document.cookie = name.textContent + `=;expires=${new Date().toUTCString()};`
+    row.remove();
+    delete objCoockie[key];
+    
+  });
+
+  row.appendChild(name);
+  row.appendChild(value);
+  row.appendChild(del);
+
+  listTable.appendChild(row);
+}
+
+function changeRow(key, val) {
+  let value = listTable.querySelector(`#id-${key}`);
+
+  value.textContent = val;
+}
+
 filterNameInput.addEventListener('keyup', function() {
     // здесь можно обработать нажатия на клавиши внутри текстового поля для фильтрации cookie
+    /*if (isMatching(i, array[i], field) && i){
+      watchRow(i);
+    }*/
+    let field = filterNameInput.value;
+    listTable.textContent = '';
+    for (let i in objCoockie) {
+        if (isMatching(i, field) || isMatching(objCoockie[i], field)){
+          addRow(i, objCoockie[i]);
+        } 
+    }
+    console.log(listTable.children.length);
 });
 
 addButton.addEventListener('click', () => {
+    let value = listTable.querySelector(`#id-${addNameInput.value}`);
+    let field = filterNameInput.value;
     // здесь можно обработать нажатие на кнопку "добавить cookie"
+    if (!value) {
+      //addRow(addNameInput.value, addValueInput.value);
+      if (isMatching(addNameInput.value, field) || isMatching(addValueInput.value, field)){
+        addRow(addNameInput.value, addValueInput.value);
+      } 
+    } else {
+      changeRow(addNameInput.value, addValueInput.value);  
+    }
+
+    document.cookie = `${addNameInput.value}=${addValueInput.value}`;
+    objCoockie[addNameInput.value] = addValueInput.value;  
+
+    
+    
+    console.log(listTable.children.length);
 });
+
+function isMatching(full, chunk) {
+  full = full.toLowerCase();
+  chunk = chunk.toLowerCase();
+  
+  return full.indexOf(chunk) >=0 ? true : false;
+}
+let field = filterNameInput.value;
+for (let i in objCoockie) {
+  if (isMatching(i, field) || isMatching(objCoockie[i], field)){
+    addRow(i, objCoockie[i]);
+  } 
+}
+console.log(listTable.children.length);
+
+/*function delRow() {
+  console.log('asd');
+}*/
